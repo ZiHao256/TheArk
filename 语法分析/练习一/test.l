@@ -1,3 +1,4 @@
+
 %{
 
 #include<stdio.h>
@@ -9,20 +10,20 @@ void yyerror(char *);
 ID          [_a-zA-Z]+[0-9a-zA-Z_]*
 INUM_VALUE        [1-9][0-9]*|0
 FNUM_VALUE        ([1-9][0-9]*|0)(\.[0-9]*)?
-CHAR_VALUE        \'[a-zA-Z0-9]\'
+CHAR_VALUE        '.'
 
 %%
 
+"int"         return INT;
+"double"      return  DOUBLE;
+"char"        return CHAR;
 {ID}        return ID;
-{INUM}      return INUM;
-{FNUM}      return FNUM;
+{INUM_VALUE}      return INUM_VALUE;
+{FNUM_VALUE}      return FNUM_VALUE;
 {CHAR_VALUE} return CHAR_VALUE;
-int         return INT;
-double      return  DOUBLE;
-char        return CHAR;
 "="          return EQUAL;
-\n          return LF;
-[ \t]
+";"			return END;
+"\n"          return LF;
 .
 
 

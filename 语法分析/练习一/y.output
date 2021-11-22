@@ -1,0 +1,300 @@
+Grammar
+
+    0 $accept: line_list $end
+
+    1 line_list: line
+    2          | line_list line
+
+    3 line: e LF
+
+    4 e: INT ID END
+    5  | INT ID EQUAL INUM_VALUE END
+    6  | INT ID EQUAL CHAR_VALUE END
+    7  | DOUBLE ID END
+    8  | DOUBLE ID EQUAL INUM_VALUE END
+    9  | DOUBLE ID EQUAL FNUM_VALUE END
+   10  | CHAR ID END
+   11  | CHAR ID EQUAL INUM_VALUE END
+   12  | CHAR ID EQUAL CHAR_VALUE END
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    ID (258) 4 5 6 7 8 9 10 11 12
+    INUM_VALUE (259) 5 8 11
+    FNUM_VALUE (260) 9
+    CHAR_VALUE (261) 6 12
+    INT (262) 4 5 6
+    DOUBLE (263) 7 8 9
+    CHAR (264) 10 11 12
+    EQUAL (265) 5 6 8 9 11 12
+    END (266) 4 5 6 7 8 9 10 11 12
+    LF (267) 3
+
+
+Nonterminals, with rules where they appear
+
+    $accept (13)
+        on left: 0
+    line_list (14)
+        on left: 1 2
+        on right: 0 2
+    line (15)
+        on left: 3
+        on right: 1 2
+    e (16)
+        on left: 4 5 6 7 8 9 10 11 12
+        on right: 3
+
+
+State 0
+
+    0 $accept: . line_list $end
+
+    INT     shift, and go to state 1
+    DOUBLE  shift, and go to state 2
+    CHAR    shift, and go to state 3
+
+    line_list  go to state 4
+    line       go to state 5
+    e          go to state 6
+
+
+State 1
+
+    4 e: INT . ID END
+    5  | INT . ID EQUAL INUM_VALUE END
+    6  | INT . ID EQUAL CHAR_VALUE END
+
+    ID  shift, and go to state 7
+
+
+State 2
+
+    7 e: DOUBLE . ID END
+    8  | DOUBLE . ID EQUAL INUM_VALUE END
+    9  | DOUBLE . ID EQUAL FNUM_VALUE END
+
+    ID  shift, and go to state 8
+
+
+State 3
+
+   10 e: CHAR . ID END
+   11  | CHAR . ID EQUAL INUM_VALUE END
+   12  | CHAR . ID EQUAL CHAR_VALUE END
+
+    ID  shift, and go to state 9
+
+
+State 4
+
+    0 $accept: line_list . $end
+    2 line_list: line_list . line
+
+    $end    shift, and go to state 10
+    INT     shift, and go to state 1
+    DOUBLE  shift, and go to state 2
+    CHAR    shift, and go to state 3
+
+    line  go to state 11
+    e     go to state 6
+
+
+State 5
+
+    1 line_list: line .
+
+    $default  reduce using rule 1 (line_list)
+
+
+State 6
+
+    3 line: e . LF
+
+    LF  shift, and go to state 12
+
+
+State 7
+
+    4 e: INT ID . END
+    5  | INT ID . EQUAL INUM_VALUE END
+    6  | INT ID . EQUAL CHAR_VALUE END
+
+    EQUAL  shift, and go to state 13
+    END    shift, and go to state 14
+
+
+State 8
+
+    7 e: DOUBLE ID . END
+    8  | DOUBLE ID . EQUAL INUM_VALUE END
+    9  | DOUBLE ID . EQUAL FNUM_VALUE END
+
+    EQUAL  shift, and go to state 15
+    END    shift, and go to state 16
+
+
+State 9
+
+   10 e: CHAR ID . END
+   11  | CHAR ID . EQUAL INUM_VALUE END
+   12  | CHAR ID . EQUAL CHAR_VALUE END
+
+    EQUAL  shift, and go to state 17
+    END    shift, and go to state 18
+
+
+State 10
+
+    0 $accept: line_list $end .
+
+    $default  accept
+
+
+State 11
+
+    2 line_list: line_list line .
+
+    $default  reduce using rule 2 (line_list)
+
+
+State 12
+
+    3 line: e LF .
+
+    $default  reduce using rule 3 (line)
+
+
+State 13
+
+    5 e: INT ID EQUAL . INUM_VALUE END
+    6  | INT ID EQUAL . CHAR_VALUE END
+
+    INUM_VALUE  shift, and go to state 19
+    CHAR_VALUE  shift, and go to state 20
+
+
+State 14
+
+    4 e: INT ID END .
+
+    $default  reduce using rule 4 (e)
+
+
+State 15
+
+    8 e: DOUBLE ID EQUAL . INUM_VALUE END
+    9  | DOUBLE ID EQUAL . FNUM_VALUE END
+
+    INUM_VALUE  shift, and go to state 21
+    FNUM_VALUE  shift, and go to state 22
+
+
+State 16
+
+    7 e: DOUBLE ID END .
+
+    $default  reduce using rule 7 (e)
+
+
+State 17
+
+   11 e: CHAR ID EQUAL . INUM_VALUE END
+   12  | CHAR ID EQUAL . CHAR_VALUE END
+
+    INUM_VALUE  shift, and go to state 23
+    CHAR_VALUE  shift, and go to state 24
+
+
+State 18
+
+   10 e: CHAR ID END .
+
+    $default  reduce using rule 10 (e)
+
+
+State 19
+
+    5 e: INT ID EQUAL INUM_VALUE . END
+
+    END  shift, and go to state 25
+
+
+State 20
+
+    6 e: INT ID EQUAL CHAR_VALUE . END
+
+    END  shift, and go to state 26
+
+
+State 21
+
+    8 e: DOUBLE ID EQUAL INUM_VALUE . END
+
+    END  shift, and go to state 27
+
+
+State 22
+
+    9 e: DOUBLE ID EQUAL FNUM_VALUE . END
+
+    END  shift, and go to state 28
+
+
+State 23
+
+   11 e: CHAR ID EQUAL INUM_VALUE . END
+
+    END  shift, and go to state 29
+
+
+State 24
+
+   12 e: CHAR ID EQUAL CHAR_VALUE . END
+
+    END  shift, and go to state 30
+
+
+State 25
+
+    5 e: INT ID EQUAL INUM_VALUE END .
+
+    $default  reduce using rule 5 (e)
+
+
+State 26
+
+    6 e: INT ID EQUAL CHAR_VALUE END .
+
+    $default  reduce using rule 6 (e)
+
+
+State 27
+
+    8 e: DOUBLE ID EQUAL INUM_VALUE END .
+
+    $default  reduce using rule 8 (e)
+
+
+State 28
+
+    9 e: DOUBLE ID EQUAL FNUM_VALUE END .
+
+    $default  reduce using rule 9 (e)
+
+
+State 29
+
+   11 e: CHAR ID EQUAL INUM_VALUE END .
+
+    $default  reduce using rule 11 (e)
+
+
+State 30
+
+   12 e: CHAR ID EQUAL CHAR_VALUE END .
+
+    $default  reduce using rule 12 (e)

@@ -11,7 +11,7 @@ title: Alex Ma
 
 新手框架：
 
-test.y
+test.l
 
 ```C
 %{
@@ -25,7 +25,7 @@ void yyerror(char *);
 //空
 ```
 
-test.l
+test.y
 
 ```C
 %{
@@ -51,14 +51,253 @@ int main()
 
 ```
 
-​		中国天眼——500m 口径球面射电望远镜（FAST），是我国具有自主知识产权的目前世界上最大、最灵敏的单口径射电望远镜，由主动反射面、馈源舱以及相关控制、测量和支撑系统组成。FAST 通过主动控制形成抛物面以汇聚电磁波，并采用钢索拖动馈源舱使得该平台中心在一个确定焦面上移动，以获得天体电磁波经反射后的最佳接收效果。其中，主动反射面系统借助 6525 根钢索，形成口径为500m 的球冠状索网，将4300 块三角形反射面单元铺设在2226 个主索节点上。工作期间，FAST 通过促动器、下拉索和节点来调节反射面单元径向位置，以便在500m 口径基准球面反射面背景上，形成不断移动的300m 口径瞬时抛物面，实现天体观测。将反射面调节为工作抛物面是主动反射技术的关键。
+## 小练习
 
-​		如何在反射面板调节约束下，确定一个理想抛物面，并将通过调节索网型面使得反射面最佳贴合于工作抛物面，以获得天体电磁波经反射后的最佳接受效果，是中国天眼FAST 工作时面临的一大问题。本文结合实际情况对FAST 的工作状态作出合理假设，引入轴向均方误差，建立理想抛物面模型。根据理想抛物面模型建立反射板调节模型，并分别比较调节前后馈源舱对信号的接收比。
+```
+练习简介：
+  在C语言中，我们常常需要定义变量，而定义变量是有语法规则的。
+  现在我们希望编写一个分析器，判断一行定义变量的C代码是否合法。
+目前我们希望以下定义方式合法：
+  [类型] [变量名] ;
+  [类型] [变量名] = [值];
+  [类型]为int、double或char，字符的值用''括起。
+  	产生式：
+  	e: type ID END
+    | type ID EQUAL value END
+    ;
+    type: INT
+    | DOUBLE
+    | CHAR
+    ;
+    value: INT_VALUE
+    | CHAR_VALUE
+    | DOUBLE_VALUE
+    ;
+  如果在定义变量时直接赋值，则需要满足以下规定：
+  int型与char型的变量，值可以是整数或字符，不能为小数（不判断值是否会溢出）
+  double型的变量，值可以是小数或整数，但不能是字符
 
-​		先进性：研究选题是中国天眼——500m 口径球面射电望远镜，该选题具有先进性。
+测试数据：
+  double a_test;
+  int a=5;
+  double b=2.33;
+  char c='t';
+  （以上都是合法输入）
+  ...
+  语法组合较多，请自行编写测试数据。
 
-​		科学性：在立论上未带个人好恶的偏见，无主观臆造，切实地从客观实际触发，在论据上，本作品参考大量论文及资料，以充分的、确凿有力的论据作为依据。在论证时，经过了周密的思考，进行了严谨的建模与计算。
+```
 
-​		适用于球面射电望远镜。
 
-​		
+
+
+
+**词法分析：**
+
+* 种别：
+  * 关键词 INT DOUBLE CHAR
+  * 标识符 ID
+  * 界符 EQUAL END
+  * 常量 INUM_VALUE FNUM_VALUE CHAR_VALUE
+
+```C
+
+%{
+
+#include<stdio.h>
+#include"y.tab.h"
+void yyerror(char *);
+
+%}
+
+ID          [_a-zA-Z]+[0-9a-zA-Z_]*
+INUM_VALUE        [1-9][0-9]*|0
+FNUM_VALUE        ([1-9][0-9]*|0)(\.[0-9]*)?
+CHAR_VALUE        '.'
+
+%%
+
+"int"         return INT;
+"double"      return  DOUBLE;
+"char"        return CHAR;
+{ID}        return ID;
+{INUM_VALUE}      return INUM_VALUE;
+{FNUM_VALUE}      return FNUM_VALUE;
+{CHAR_VALUE} return CHAR_VALUE;
+"="          return EQUAL;
+";"			return END;
+"\n"          return LF;
+.
+
+
+%%
+```
+
+
+
+**语法分析：**
+
+* 产生式：
+
+  * ```
+    
+        e: INT ID END
+        | INT ID EQUAL INUM_VALUE END
+        | INT ID EQUAL CHAR_VALUE END
+        | DOUBLE ID END
+        | DOUBLE ID EQUAL INUM_VALUE END
+        | DOUBLE ID EQUAL FNUM_VALUE END
+        | CHAR ID END
+        | CHAR ID EQUAL INUM_VALUE END
+        | CHAR ID EQUAL CHAR_VALUE END
+        ;
+        
+    ```
+
+  * 
+
+```C
+
+%{
+#include<stdio.h>
+#include<string.h>
+int yylex(void);
+void yyerror(char *);
+%}
+%token ID INUM_VALUE FNUM_VALUE CHAR_VALUE INT DOUBLE CHAR EQUAL END LF
+
+%%
+
+    line_list: line
+    | line_list line
+    ;
+
+    line: e LF  {printf("YES\n");}
+
+    e: INT ID END
+    | INT ID EQUAL INUM_VALUE END
+    | INT ID EQUAL CHAR_VALUE END
+    | DOUBLE ID END
+    | DOUBLE ID EQUAL INUM_VALUE END
+    | DOUBLE ID EQUAL FNUM_VALUE END
+    | CHAR ID END
+    | CHAR ID EQUAL INUM_VALUE END
+    | CHAR ID EQUAL CHAR_VALUE END
+    ;
+    
+    
+%%
+void yyerror(char *str){
+    fprintf(stderr,"error:%s\n",str);
+}
+
+int yywrap(){
+    return 1;
+}
+int main()
+{
+    yyparse();
+}
+```
+
+## 计算器
+
+​		做出只有加减乘除四种功能的计算器。这个计算器的功能为，当输入合法时，输出这个表达式的值。a+b*c
+
+### flex 程序传值给 bison程序
+
+> bison程序维护了两个栈，一个是**文法符号栈**，用来进行语法上的归约和移进；另一个则是**属性值栈**，这个栈内的值是与文法符号栈一一对应的，当一个文法符号被压栈时，它的值也被压进了属性值栈。因此，我们可以在属性值栈中寻找我们需要的值。
+
+​		bison的全局变量yylval。在flex进行词法分析时，一旦分析成功，我们就在action中令yylval等于需要传入的值。
+
+* 例子：在分析出一个整数之后，可以做sscanf(yytext,"%d",&yylval);操作
+
+​		bison 宏，叫做YYSTYPE，表示yylval的数据类型。通常情况下，YYSTYPE定义为int型。如果想要更改，可以做如下操作：#define YYSTYPE double
+
+​		传更多类型：在bison第一部分：
+
+```C
+%union{
+  int inum;
+  double fnum;
+  char c;
+  char * string;
+  //其余类型随意加
+}
+```
+
+### test.y
+
+```C
+%{
+#include <stdio.h>
+#include <string.h>
+int yylex(void);
+void yyerror(char *);
+%}
+
+//定义从flex程序传来的yylval数据类型
+%union{
+  int inum;
+  double dnum;
+}
+%token ADD SUB MUL DIV CR
+%token <inum> NUM		//指定类型和终结符
+%type  <inum> expression term single	//指定类型和非终结符
+
+%%
+       line_list: line
+                | line_list line
+                ;
+				
+	       line : expression CR  {printf(">>%d\n",$1);}
+
+      expression: term 
+                | expression ADD term   {$$=$1+$3;}	//计算终结符或者非终结符的值
+				| expression SUB term   {$$=$1-$3;}
+                ;
+
+            term: single
+				| term MUL single		{$$=$1*$3;}
+				| term DIV single		{$$=$1/$3;}
+				;
+				
+		  single: NUM
+				;
+%%
+
+```
+
+### test.l
+
+```C
+%{
+#include<stdio.h>
+#include<string.h>
+#include "y.tab.h"
+void yyerror(char *);
+
+%}
+
+NUM     [1-9]+[0-9]*|0
+
+%%
+
+{NUM}   {sscanf(yytext, "%d", &yylval);return NUM;}
+"+"     return ADD;
+"-"     return SUB;
+"*"     return MUL;
+"/"     return DIV;
+"\n"    return LF;
+.
+
+
+%%
+```
+
+
+
+# PL/0 语法分析
+
+
+
